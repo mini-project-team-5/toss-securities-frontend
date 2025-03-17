@@ -1,17 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Home from "./pages/Home";
-import './App.css';
-//import SideBar from "../src/components/SideBar";
+import SideBar from "./components/SideBar";
+import WishListPage from "./pages/WishListPage";
 
 function App() {
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-      </Routes>
+      <div style={{ display: "flex", width: "100%" }}>
+        <SideBar isWishlistOpen={isWishlistOpen} setIsWishlistOpen={setIsWishlistOpen} />
+        <div style={{ flex: 1 }}>
+          <Header isWishlistOpen={isWishlistOpen} />
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+          <WishListPage isOpen={isWishlistOpen} />
+        </div>
+      </div>
     </Router>
   );
 };

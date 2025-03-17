@@ -4,12 +4,12 @@ import styled from "styled-components";
 import SearchIcon from "../assets/search.png";
 import LogoImage from "../assets/logo.png";
 
-const Header = () => {
+const Header = ({ isWishlistOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   return (
-    <HeaderContainer>
+    <HeaderContainer isWishlistOpen={isWishlistOpen}>
       <Logo onClick={() => navigate("/")}> <img src={LogoImage} alt="토스증권 로고" /></Logo>
 
       <NavMenu>
@@ -24,7 +24,9 @@ const Header = () => {
         </SearchBar>
       </NavMenu>
 
-      <LoginButton onClick={() => navigate("/login")}>로그인</LoginButton>
+      <LoginButton isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
+        로그인
+      </LoginButton>
     </HeaderContainer>
   );
 };
@@ -33,18 +35,17 @@ export default Header;
 
 // 스타일 컴포넌트
 const HeaderContainer = styled.div`
-  width: 100%;  
+  width: calc(100% - 200px);
   height: 80px;
-  padding: 13px 30px;
+  padding: 10px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: white;
   position: fixed;
   top: 0;
-  left: 0;
+  transition: right 0.3s ease-in-out;
   z-index: 1000;
-  box-sizing: border-box;
 `;
 
 const Logo = styled.h1`
@@ -121,8 +122,8 @@ const LoginButton = styled.button`
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease-in-out;
-  margin-left: 20px;
+  transition: all 0.3s ease-in-out;
+  margin-right: ${({ isWishlistOpen }) => (isWishlistOpen ? "360px" : "0")};
 
   &:hover {
     background: #005ecb;

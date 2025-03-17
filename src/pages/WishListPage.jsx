@@ -62,7 +62,7 @@ const WishListPageContainer = styled.div`
   flex-direction: column;
   border-right: 1px solid #ddd;
   align-items: flex-start;
-  z-index: 1100;
+  z-index: 1000;
   opacity: ${({ isOpen }) => (isOpen ? "1" : "0")};
   transform: translateX(${({ isOpen }) => (isOpen ? "0" : "10px")});
   transition: right 0.2s ease-in-out, opacity 0.5s ease-in-out, transform 0.2s ease-in-out;
@@ -148,7 +148,7 @@ const StockPrice = styled.span`
 
 const StockChange = styled.span`
   font-size: 14px;
-  color: ${({ change }) => (change.includes("+") ? "red" : "blue")}; /* ✅ 양수 = 빨간색, 음수 = 파란색 */
+  color: ${({ change }) => (change.includes("+") ? "red" : "blue")};
 `;
 
 const HeartIcon = styled.div`

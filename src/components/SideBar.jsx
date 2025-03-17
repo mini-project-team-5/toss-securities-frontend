@@ -10,12 +10,11 @@ import Live1 from "../assets/fire1.png";
 import Live2 from "../assets/fire2.png"; 
 import WishListPage from "../pages/WishListPage";
 
-const SideBar = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const SideBar = ({ isWishlistOpen, setIsWishlistOpen }) => {
   const [hoveredButton, setHoveredButton] = useState(null);
 
   const toggleSidebar = () => {
-    setIsExpanded(!isExpanded);
+    setIsWishlistOpen(!isWishlistOpen);
   };
 
   return (
@@ -35,8 +34,8 @@ const SideBar = () => {
         onMouseEnter={() => setHoveredButton("heart")}
         onMouseLeave={() => setHoveredButton(null)}
       >
-        <IconWrapper isHovered={isExpanded || hoveredButton === "heart"}>
-          <StyledIcon src={isExpanded || hoveredButton === "heart" ? like2 : like1} />
+        <IconWrapper isHovered={isWishlistOpen || hoveredButton === "heart"}>
+          <StyledIcon src={isWishlistOpen || hoveredButton === "heart" ? like2 : like1} />
         </IconWrapper>
         <span>관심</span>
       </SidebarButton>
@@ -63,7 +62,7 @@ const SideBar = () => {
         <span>실시간</span>
       </SidebarButton>
 
-      <WishListPage isOpen={isExpanded} />
+      <WishListPage isOpen={isWishlistOpen} />
     </Container>
   );
 };
