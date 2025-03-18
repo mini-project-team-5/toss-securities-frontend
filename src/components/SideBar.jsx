@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import like1 from "../assets/like1.png";
-import like2 from "../assets/like2.png"; 
-import Stock1 from "../assets/stock1.png"; 
-import Stock2 from "../assets/stock2.png"; 
-import Recent1 from "../assets/calendar1.png"; 
-import Recent2 from "../assets/calendar2.png";
-import Live1 from "../assets/fire1.png"; 
-import Live2 from "../assets/fire2.png"; 
-import WishListPage from "../pages/WishListPage";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import like1 from '../assets/like1.png';
+import like2 from '../assets/like2.png';
+import Stock1 from '../assets/stock1.png';
+import Stock2 from '../assets/stock2.png';
+import Recent1 from '../assets/calendar1.png';
+import Recent2 from '../assets/calendar2.png';
+import Live1 from '../assets/fire1.png';
+import Live2 from '../assets/fire2.png';
+import WishListPage from '../pages/WishListPage';
 
 const SideBar = ({ isWishlistOpen, setIsWishlistOpen }) => {
   const [hoveredButton, setHoveredButton] = useState(null);
@@ -20,32 +20,34 @@ const SideBar = ({ isWishlistOpen, setIsWishlistOpen }) => {
   return (
     <Container>
       <SidebarButton
-        onMouseEnter={() => setHoveredButton("invest")}
+        onMouseEnter={() => setHoveredButton('invest')}
         onMouseLeave={() => setHoveredButton(null)}
       >
-        <IconWrapper isHovered={hoveredButton === "invest"}>
-          <StyledIcon src={hoveredButton === "invest" ? Stock2 : Stock1} />
+        <IconWrapper $isHovered={hoveredButton === 'invest'}>
+          <StyledIcon src={hoveredButton === 'invest' ? Stock2 : Stock1} />
         </IconWrapper>
         <span>내 투자</span>
       </SidebarButton>
 
       <SidebarButton
         onClick={toggleSidebar}
-        onMouseEnter={() => setHoveredButton("heart")}
+        onMouseEnter={() => setHoveredButton('heart')}
         onMouseLeave={() => setHoveredButton(null)}
       >
-        <IconWrapper isHovered={isWishlistOpen || hoveredButton === "heart"}>
-          <StyledIcon src={isWishlistOpen || hoveredButton === "heart" ? like2 : like1} />
+        <IconWrapper $isHovered={isWishlistOpen || hoveredButton === 'heart'}>
+          <StyledIcon
+            src={isWishlistOpen || hoveredButton === 'heart' ? like2 : like1}
+          />
         </IconWrapper>
         <span>관심</span>
       </SidebarButton>
 
       <SidebarButton
-        onMouseEnter={() => setHoveredButton("recent")}
+        onMouseEnter={() => setHoveredButton('recent')}
         onMouseLeave={() => setHoveredButton(null)}
       >
-        <IconWrapper isHovered={hoveredButton === "recent"}>
-          <StyledIcon src={hoveredButton === "recent" ? Recent2 : Recent1} />
+        <IconWrapper $isHovered={hoveredButton === 'recent'}>
+          <StyledIcon src={hoveredButton === 'recent' ? Recent2 : Recent1} />
         </IconWrapper>
         <span>최근 본</span>
       </SidebarButton>
@@ -53,11 +55,11 @@ const SideBar = ({ isWishlistOpen, setIsWishlistOpen }) => {
       <Divider />
 
       <SidebarButton
-        onMouseEnter={() => setHoveredButton("live")}
+        onMouseEnter={() => setHoveredButton('live')}
         onMouseLeave={() => setHoveredButton(null)}
       >
-        <IconWrapper isHovered={hoveredButton === "live"}>
-          <StyledIcon src={hoveredButton === "live" ? Live2 : Live1} />
+        <IconWrapper $isHovered={hoveredButton === 'live'}>
+          <StyledIcon src={hoveredButton === 'live' ? Live2 : Live1} />
         </IconWrapper>
         <span>실시간</span>
       </SidebarButton>
@@ -119,7 +121,7 @@ const IconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: ${(props) => (props.isHovered ? "lightgray" : "transparent")};
+  background: ${(props) => (props.$isHovered ? 'lightgray' : 'transparent')};
   transition: background 0.2s ease-in-out;
 `;
 

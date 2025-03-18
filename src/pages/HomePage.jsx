@@ -128,10 +128,15 @@ const HomePage = () => {
 export default HomePage;
 
 const HomePageContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 40px;
+  // max-width: 1200px;
+  // margin: 0 auto;
+  // padding-right: 80px;
+
   display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 100px;
+  padding-right: 180px;
 `;
 const StockList = styled.div`
   width: 100%;

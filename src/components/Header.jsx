@@ -1,30 +1,61 @@
-import React from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import styled from "styled-components";
-import SearchIcon from "../assets/search.png";
-import LogoImage from "../assets/logo.png";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import styled from 'styled-components';
+import SearchIcon from '../assets/search.png';
+import LightModeLogo from '../assets/light-mode-logo.png';
+import DarkModeLogo from '../assets/dark-mode-logo.png';
 
 const Header = ({ isWishlistOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDarkMode(mediaQuery.matches);
+
+    const handleChange = (e) => {
+      setIsDarkMode(e.matches);
+    };
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, []);
+
   return (
-    <HeaderContainer isWishlistOpen={isWishlistOpen}>
-      <Logo onClick={() => navigate("/")}> <img src={LogoImage} alt="토스증권 로고" /></Logo>
+    <HeaderContainer $isDarkMode={isDarkMode}>
+      <Logo onClick={() => navigate('/')}>
+        <img
+          src={isDarkMode ? DarkModeLogo : LightModeLogo}
+          alt="토스증권 로고"
+        />
+      </Logo>
 
       <NavMenu>
-        <NavItem onClick={() => navigate("/")} active={location.pathname === "/"}>홈</NavItem>
+        <NavItem
+          onClick={() => navigate('/')}
+          $active={location.pathname === '/'}
+        >
+          홈
+        </NavItem>
         <NavItem>뉴스</NavItem>
         <NavItem>주식 골라보기</NavItem>
         <NavItem>내 계좌</NavItem>
-      
+
         <SearchBar>
           <SearchImage src={SearchIcon} alt="검색 아이콘" />
           <SearchInput type="text" placeholder="/ 를 눌러 검색하세요" />
         </SearchBar>
       </NavMenu>
 
-      <LoginButton isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
+      <LoginButton
+        isWishlistOpen={isWishlistOpen}
+        onClick={() => navigate('/login')}
+      >
         로그인
       </LoginButton>
     </HeaderContainer>
@@ -35,14 +66,15 @@ export default Header;
 
 // 스타일 컴포넌트
 const HeaderContainer = styled.div`
+  background-color: ${(props) => (props.$isDarkMode ? '#17171c' : '#fff')};
   width: calc(100% - 200px);
   height: 80px;
-  padding: 10px 15px;
+  padding: 10px 0;
+  padding-left: 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: white;
-  position: fixed;
+  position: sticky;
   top: 0;
   transition: right 0.3s ease-in-out;
   z-index: 1000;
@@ -52,7 +84,7 @@ const Logo = styled.h1`
   cursor: pointer;
 
   img {
-    width: 150px;
+    width: 78px;
     height: auto;
   }
 `;
@@ -71,12 +103,13 @@ const NavItem = styled.button`
   font-size: 16px;
   font-weight: 550;
   cursor: pointer;
-  color: ${({ active }) => (active ? "#3E3E41" : "#97999F")};  padding: 5px 10px;
+  color: ${(props) => (props.$active ? 'inherit' : '#97999F')};
+  padding: 5px 10px;
   transition: color 0.2s ease-in-out;
-  outline: none; 
+  outline: none;
 
   &:hover {
-    color: #3E3E41;
+    color: #3e3e41;
   }
 
   &:focus {
@@ -87,7 +120,7 @@ const NavItem = styled.button`
 const SearchBar = styled.div`
   display: flex;
   align-items: center;
-  background: #f1f3f5;
+  background: rgba(116, 116, 116, 0.2);
   border-radius: 30px;
   padding: 15px 15px;
   gap: 15px;
@@ -105,16 +138,16 @@ const SearchInput = styled.input`
   outline: none;
   font-size: 16px;
   font-weight: 600;
-  color: #3E3E41;
+  color: #3e3e41;
   width: 100%;
 
   &::placeholder {
-    color: #97999F;
+    color: #97999f;
   }
 `;
 
 const LoginButton = styled.button`
-  background: #1A73E8;
+  background: #1a73e8;
   color: white;
   border: none;
   padding: 8px 15px;
@@ -123,7 +156,6 @@ const LoginButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  margin-right: ${({ isWishlistOpen }) => (isWishlistOpen ? "360px" : "0")};
 
   &:hover {
     background: #005ecb;
