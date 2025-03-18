@@ -1,12 +1,30 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import like1 from "../assets/like1.png";
-import like2 from "../assets/like2.png";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import like1 from '../assets/like1.png';
+import like2 from '../assets/like2.png';
 
 const mockData = [
-  { id: 1, name: "셀렉티스(ADR)", price: "2,700원", change: "+827원 (44.1%)", liked: true },
-  { id: 2, name: "디지털 앨라이", price: "140원", change: "+25원 (22.1%)", liked: false },
-  { id: 3, name: "메디룸 헬스케어", price: "1,323원", change: "+423원 (47.0%)", liked: true },
+  {
+    id: 1,
+    name: '셀렉티스(ADR)',
+    price: '2,700원',
+    change: '+827원 (44.1%)',
+    liked: true,
+  },
+  {
+    id: 2,
+    name: '디지털 앨라이',
+    price: '140원',
+    change: '+25원 (22.1%)',
+    liked: false,
+  },
+  {
+    id: 3,
+    name: '메디룸 헬스케어',
+    price: '1,323원',
+    change: '+423원 (47.0%)',
+    liked: true,
+  },
 ];
 
 const WishListPage = ({ isOpen }) => {
@@ -15,13 +33,13 @@ const WishListPage = ({ isOpen }) => {
   const toggleLike = (id) => {
     setStocks((prevStocks) =>
       prevStocks.map((stock) =>
-        stock.id === id ? { ...stock, liked: !stock.liked } : stock
-      )
+        stock.id === id ? { ...stock, liked: !stock.liked } : stock,
+      ),
     );
   };
 
   return (
-    <WishListPageContainer isOpen={isOpen}>
+    <WishListPageContainer $isOpen={isOpen}>
       <Title>관심 종목</Title>
       <Divider />
       <MenuItem>관심 주식 TOP 10</MenuItem>
@@ -34,7 +52,7 @@ const WishListPage = ({ isOpen }) => {
             </StockInfo>
             <StockPriceChange>
               <StockPrice>{stock.price}</StockPrice>
-              <StockChange change={stock.change}>{stock.change}</StockChange>
+              <StockChange $change={stock.change}>{stock.change}</StockChange>
             </StockPriceChange>
             <HeartIcon onClick={() => toggleLike(stock.id)}>
               <img src={stock.liked ? like2 : like1} alt="heart" />
@@ -52,7 +70,7 @@ export default WishListPage;
 const WishListPageContainer = styled.div`
   position: fixed;
   top: 0;
-  right: ${({ isOpen }) => (isOpen ? "80px" : "-350px")};
+  right: ${(props) => (props.$isOpen ? '80px' : '-350px')};
   width: 350px;
   height: 100vh;
   background: #f8f9fa;
@@ -63,13 +81,16 @@ const WishListPageContainer = styled.div`
   border-right: 1px solid #ddd;
   align-items: flex-start;
   z-index: 1000;
-  opacity: ${({ isOpen }) => (isOpen ? "1" : "0")};
-  transform: translateX(${({ isOpen }) => (isOpen ? "0" : "10px")});
-  transition: right 0.2s ease-in-out, opacity 0.5s ease-in-out, transform 0.2s ease-in-out;
+  opacity: ${(props) => (props.$isOpen ? '1' : '0')};
+  transform: translateX(${(props) => (props.$isOpen ? '0' : '10px')});
+  transition:
+    right 0.2s ease-in-out,
+    opacity 0.5s ease-in-out,
+    transform 0.2s ease-in-out;
 `;
 
 const Title = styled.div`
-  color: #3E3E41;
+  color: #3e3e41;
   font-size: 20px;
 `;
 
@@ -87,7 +108,7 @@ const MenuItem = styled.div`
   text-align: left;
   font-size: 17px;
   cursor: pointer;
-  color: #3E3E41;
+  color: #3e3e41;
 
   &:hover {
     background: #f1f1f1;
@@ -123,7 +144,7 @@ const StockInfo = styled.div`
 const StockName = styled.span`
   font-size: 16px;
   font-weight: 700;
-  color: #3E3E41;
+  color: #3e3e41;
 `;
 
 const StockPriceWrapper = styled.div`
@@ -143,12 +164,12 @@ const StockPriceChange = styled.div`
 const StockPrice = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: #3E3E41;
+  color: #3e3e41;
 `;
 
 const StockChange = styled.span`
   font-size: 14px;
-  color: ${({ change }) => (change.includes("+") ? "red" : "blue")};
+  color: ${(props) => (props.$change.includes('+') ? 'red' : 'blue')};
 `;
 
 const HeartIcon = styled.div`
