@@ -19,7 +19,6 @@ const SignupPage = () => {
   });
   const [formComplete, setFormComplete] = useState(false);
 
-  // 입력 필드 완성 여부 확인
   useEffect(() => {
     const isFormFilled = 
       name.trim() !== "" && 
@@ -32,37 +31,30 @@ const SignupPage = () => {
     setFormComplete(isFormFilled);
   }, [name, birthDate, genderDigit, carrier, phoneNumber, isChecked]);
 
-  // 생년월일 앞 6자리 입력 처리
   const handleBirthDateChange = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 6);
     console.log("생년월일 입력:", value);
     setBirthDate(value);
   };
 
-  // 주민번호 뒷자리 첫 숫자 입력 처리
   const handleGenderDigitChange = (e) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 1);
     console.log("성별 숫자 입력:", value);
     setGenderDigit(value);
   };
 
-  // 휴대폰 번호 입력 처리 (000 0000 0000 형식으로 포맷팅)
   const handlePhoneNumberChange = (e) => {
     const value = e.target.value.replace(/\D/g, "");
     console.log("휴대폰 번호 입력 (원본):", value);
     
-    // 포맷팅: 000 0000 0000 형식
     let formattedValue = "";
     if (value.length > 0) {
-      // 첫 번째 부분 (통상 3자리)
       formattedValue = value.slice(0, 3);
       
-      // 두 번째 부분 (통상 4자리)
       if (value.length > 3) {
         formattedValue += " " + value.slice(3, 7);
       }
       
-      // 세 번째 부분 (통상 4자리)
       if (value.length > 7) {
         formattedValue += " " + value.slice(7, 11);
       }
@@ -72,7 +64,6 @@ const SignupPage = () => {
     setPhoneNumber(formattedValue);
   };
 
-  // 필수 약관 동의 시 전체 선택
   const handleAllCheck = () => {
     const newState = !isChecked.all;
     setIsChecked({
@@ -83,7 +74,6 @@ const SignupPage = () => {
     });
   };
 
-  // 개별 체크박스 선택 시 상태 업데이트
   const handleSingleCheck = (name) => {
     setIsChecked((prev) => {
       const newState = { ...prev, [name]: !prev[name] };
@@ -94,20 +84,16 @@ const SignupPage = () => {
 
   return (
     <SignupContainer>
-      {/* 좌측 상단 로고 */}
       <Logo onClick={() => navigate("/")}>
         <img src={LogoImage} alt="토스증권 로고" />
       </Logo>
 
-      {/* 우측 상단 닫기 버튼 */}
       <CloseButton onClick={() => navigate("/")}>
         <img src={CloseIcon} alt="닫기" />
       </CloseButton>
 
-      {/* 제목 */}
       <Title>회원가입</Title>
 
-      {/* 회원가입 폼 */}
       <SignupBox>
         <NameInput 
           type="text" 
@@ -124,7 +110,6 @@ const SignupPage = () => {
             onChange={handleBirthDateChange}
           />
           <Hyphen>-</Hyphen>
-          {/* MaskedInputWrapper 제거하고 각 요소를 분리 */}
           <GenderInput
             type="text"
             value={genderDigit}

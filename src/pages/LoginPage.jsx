@@ -15,7 +15,6 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
 
-  // 필수 약관 동의 체크 시, 모든 체크박스 선택
   const handleAllCheck = () => {
     const newState = !isChecked.all;
     setIsChecked({
@@ -25,7 +24,6 @@ const LoginPage = () => {
     });
   };
 
-  // 개별 체크박스 변경 시 상태 업데이트
   const handleSingleCheck = (name) => {
     setIsChecked((prev) => {
       const newState = { ...prev, [name]: !prev[name] };
@@ -34,7 +32,6 @@ const LoginPage = () => {
     });
   };
 
-  // 휴대폰 번호 자동 포맷팅 (공백 삽입)
   const handlePhoneNumber = (event) => {
     let value = event.target.value.replace(/\D/g, "");
     if (value.length > 3 && value.length <= 7) {
@@ -75,8 +72,8 @@ const LoginPage = () => {
             pattern="[0-9]*"
             value={birthDate}
             onChange={(e) => {
-              let value = e.target.value.replace(/\D/g, ""); // 숫자만 허용
-              if (value.length > 6) value = value.slice(0, 6); // 최대 6자리 제한
+              let value = e.target.value.replace(/\D/g, ""); 
+              if (value.length > 6) value = value.slice(0, 6);
               setBirthDate(value);
             }}
           />
@@ -135,7 +132,7 @@ const LoginPage = () => {
 
 export default LoginPage;
 
-// ✅ 스타일 컴포넌트
+// 스타일 컴포넌트
 const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -229,7 +226,6 @@ const Input = styled.input`
   font-size: 16px;
   font-weight: bold;
 
-  /* ✅ 숫자만 입력 가능하도록 설정 */
   &[type="text"]:nth-of-type(2) {
     ime-mode: disabled;
   }
@@ -299,10 +295,10 @@ const OtherLogin = styled.p`
   margin-top: 25px;
   cursor: pointer;
 
-  border-top: 1px solid #ddd; /* ✅ 구분선 추가 */
-  padding-top: 20px; /* ✅ 구분선과 텍스트 사이 간격 */
-  width: 100%; /* ✅ 전체 너비 차지 */
-  text-align: center; /* ✅ 중앙 정렬 */
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+  width: 100%; 
+  text-align: center;
 `;
 
 const SignUp = styled.p`
