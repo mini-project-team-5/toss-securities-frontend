@@ -1,11 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import UserIcon from '../assets/im-icon.png';
+import axios from 'axios';
 
 const DetailPage = () => {
   const { code } = useParams();
-  const [value, setValue] = useState();
+  const [stock, setStock] = useState(null);
+  const [value, setValue] = useState('');
   const textareaRef = useRef(null);
 
   const handleInput = () => {
@@ -15,18 +17,39 @@ const DetailPage = () => {
     }
   };
 
+  const getStockQuote = async (stockCode) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/stock-quote/${stockCode}`,
+      );
+      setStock(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (code) {
+      getStockQuote(code);
+    }
+  }, [code]);
+
   return (
     <DetailContainer>
       <StockDetailWrapper>
         <StockInfo>
           <StockNameInfo>
-            <StockName>서울보증보험</StockName>
-            <StockCode>{code}</StockCode>
+            <StockName>{stock?.name}</StockName>
+            <StockCode>{stock?.code}</StockCode>
           </StockNameInfo>
           <StockPriceInfo>
-            <StockPrice>37,600원</StockPrice>
+            <StockPrice>{stock?.price.toLocaleString()}원</StockPrice>
             <StockContents>어제보다</StockContents>
-            <StockRate>+5,850원(17.7%)</StockRate>
+            <StockRate $changeAmount={stock?.changeAmount}>
+              {stock?.changeAmount > 0 && '+'}
+              {stock?.changeAmount.toLocaleString()}원 (
+              {Math.abs(stock?.changeRate)}%)
+            </StockRate>
           </StockPriceInfo>
         </StockInfo>
         <IconContainer>
@@ -57,7 +80,7 @@ const DetailPage = () => {
 
       <StockCommunityWrapper>
         <StockCommunity>
-          <CommunityTitle>서울보증보험 커뮤니티</CommunityTitle>
+          <CommunityTitle>{stock?.name} 커뮤니티</CommunityTitle>
           <PostingWrapper>
             <UserImageWrapper>
               <img src={UserIcon} alt="user" />
@@ -142,6 +165,12 @@ const StockContents = styled.span`
 
 const StockRate = styled.span`
   font-size: 14px;
+  color: ${(props) =>
+    props.$changeAmount > 0
+      ? '#f04251'
+      : props.$changeAmount < 0
+        ? '#3485fa'
+        : ''};
 `;
 
 const IconContainer = styled.div`
