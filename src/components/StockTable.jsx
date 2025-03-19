@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import CartButton from './CartButton';
+import { useNavigate } from 'react-router-dom';
 
 const StockTable = ({ datas }) => {
+  const navigate = useNavigate();
   const [addedItems, setAddedItems] = useState([]);
 
   // 로그인 여부 확인
@@ -16,7 +18,8 @@ const StockTable = ({ datas }) => {
     setAddedItems(savedItems);
   }, []);
 
-  const handleAddtoCart = (stock) => {
+  const handleAddtoCart = (stock, e) => {
+    e.stopPropagation(); // 이벤트 버블링 차단
     try {
       if (!checkLogin()) {
         alert('로그인이 필요합니다!');
@@ -63,10 +66,13 @@ const StockTable = ({ datas }) => {
                   ? `+${stock.rate}%`
                   : `${stock.rate}%`;
             return (
-              <TableRow key={stock.rank}>
+              <TableRow
+                key={stock.rank}
+                onClick={() => navigate(`/stock/${stock.code}`)}
+              >
                 <CartCell>
                   <CartButton
-                    onClick={() => handleAddtoCart(stock)}
+                    onClick={(e) => handleAddtoCart(stock, e)}
                     isAdded={isItemAdded(stock.rank)}
                   />
                 </CartCell>

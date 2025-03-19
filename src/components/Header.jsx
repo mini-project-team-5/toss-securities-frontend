@@ -53,7 +53,7 @@ const Header = ({ isWishlistOpen }) => {
       </NavMenu>
 
       <LoginButton
-        isWishlistOpen={isWishlistOpen}
+        $isWishlistOpen={isWishlistOpen}
         onClick={() => navigate('/login')}
       >
         로그인
