@@ -5,6 +5,8 @@ import CloseIcon from "../assets/close.png";
 import LogoImage from "../assets/logo.png";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [isChecked, setIsChecked] = useState({
@@ -12,8 +14,6 @@ const LoginPage = () => {
     privacy: false,
     thirdParty: false,
   });
-
-  const navigate = useNavigate();
 
   const handleAllCheck = () => {
     const newState = !isChecked.all;
@@ -42,6 +42,35 @@ const LoginPage = () => {
     setPhoneNumber(value);
   };
 
+  const handleLogin = () => {
+    const requestData = {
+      name,
+      birth_date: birthDate,
+      phone_number: phoneNumber.replace(/\s/g, ""),
+    };
+
+    fetch("http://localhost:8080/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+      credentials: "include",
+    })
+      .then((response) => response.text())
+      .then((data) => {
+        if (data.message.includes("로그인 성공")) {
+          document.cookie = `jwt_token=${data.token}; path=/;`
+          localStorage.setItem("user", JSON.stringify({ name: data.name, token: data.token })); // ✅ 사용자 정보 저장
+          navigate("/"); // 로그인 성공 시 홈으로 이동
+        } else {
+          alert("🚨 로그인 실패! 정보를 확인하세요.");
+        }
+      })
+      .catch((error) => {
+        console.error("로그인 오류:", error);
+        alert("🚨 서버 오류! 잠시 후 다시 시도하세요.");
+      });
+  };
+
   return (
     <LoginContainer>
       <Logo onClick={() => navigate("/")}>
@@ -56,15 +85,12 @@ const LoginPage = () => {
 
       <LoginBox>
         <TabContainer>
-          <Tab active>휴대폰 번호로 로그인</Tab>
-          <Tab>QR코드로 로그인</Tab>
+        <Tab $isActive={true}>휴대폰 번호로 로그인</Tab>
+        <Tab $isActive={false}>QR코드로 로그인</Tab>
         </TabContainer>
 
         <InputWrapper>
-          <Input
-            type="text"
-            placeholder="이름"
-          />
+        <Input type="text" placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
           <Input
             type="text"
             placeholder="생년월일 6자리"
@@ -86,7 +112,6 @@ const LoginPage = () => {
           onChange={handlePhoneNumber}
           maxLength="13"
         />
-
         <CheckboxWrapper>
           <CheckboxInput
             type="checkbox"
@@ -117,7 +142,9 @@ const LoginPage = () => {
           <Label htmlFor="agreeThirdParty">개인정보 제3자 제공 동의(토스인증서 로그인)</Label>
         </CheckboxWrapper>
 
-        <LoginButton disabled={!isChecked.all || phoneNumber.length < 13}>로그인</LoginButton>
+        <LoginButton disabled={!isChecked.all || phoneNumber.length < 13} onClick={handleLogin}>
+          로그인
+        </LoginButton>
 
         <OtherLogin>토스 앱 없이 로그인하기</OtherLogin>
       </LoginBox>
@@ -200,15 +227,17 @@ const TabContainer = styled.div`
 
 const Tab = styled.div`
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   font-size: 16px;
   font-weight: bold;
   text-align: center;
-  cursor: pointer;
-  color: ${(props) => (props.active ? "#3E3E41" : "#97999F")};
-  background: ${(props) => (props.active ? "#f1f3f5" : "transparent")};
+  cursor: ${({ $isActive }) => ($isActive ? "pointer" : "default")}; 
+  color: ${({ $isActive }) => ($isActive ? "#3E3E41" : "#97999F")}; 
+  background: ${({ $isActive }) => ($isActive ? "#f1f3f5" : "transparent")}; 
   border-radius: 50px;
+  transition: background 0.2s ease-in-out;
 `;
+
 
 const InputWrapper = styled.div`
   display: flex;

@@ -11,13 +11,17 @@ const SignupPage = () => {
   const [genderDigit, setGenderDigit] = useState("");
   const [carrier, setCarrier] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [isChecked, setIsChecked] = useState({
     all: false,
     service: false,
     policy: false,
     privacy: false,
   });
+
   const [formComplete, setFormComplete] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   useEffect(() => {
     const isFormFilled = 
@@ -50,14 +54,8 @@ const SignupPage = () => {
     let formattedValue = "";
     if (value.length > 0) {
       formattedValue = value.slice(0, 3);
-      
-      if (value.length > 3) {
-        formattedValue += " " + value.slice(3, 7);
-      }
-      
-      if (value.length > 7) {
-        formattedValue += " " + value.slice(7, 11);
-      }
+      if (value.length > 3) formattedValue += " " + value.slice(3, 7);
+      if (value.length > 7) formattedValue += " " + value.slice(7, 11);
     }
     
     console.log("휴대폰 번호 포맷팅:", formattedValue);
@@ -82,6 +80,48 @@ const SignupPage = () => {
     });
   };
 
+  // ✅ 인증번호 요청 (모달 열기)
+  const handleRequestVerification = () => {
+    fetch("http://localhost:8080/auth/send-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ phone_number: phoneNumber.replace(/\s/g, "") }),
+    })
+      .then((response) => response.text())
+      .then((message) => {
+        alert(message); // 성공 메시지 확인
+        setIsModalOpen(true); // 인증번호 입력 모달 열기
+      })
+      .catch((error) => console.error("인증번호 요청 오류:", error));
+  };
+
+  const handleSignup = () => {
+    const fullBirthDate = `${birthDate}${genderDigit}`;
+    const requestData = {
+      name,
+      birth_date: fullBirthDate,
+      phone_number: phoneNumber.replace(/\s/g, ""),
+      carrier,
+      verification_code: verificationCode,
+    };
+
+    fetch("http://localhost:8080/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    })
+      .then((response) => response.text())
+      .then((message) => {
+        if (message.includes("회원가입 성공")) {
+          setIsModalOpen(false);
+          setIsSuccessModalOpen(true); 
+        } else {
+          alert(message);
+        }
+      })
+      .catch((error) => console.error("회원가입 오류:", error));
+  };
+
   return (
     <SignupContainer>
       <Logo onClick={() => navigate("/")}>
@@ -95,27 +135,11 @@ const SignupPage = () => {
       <Title>회원가입</Title>
 
       <SignupBox>
-        <NameInput 
-          type="text" 
-          placeholder="이름" 
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
+      <NameInput type="text" placeholder="이름" value={name} onChange={(e) => setName(e.target.value)} />
         <InputWrapper>
-          <BirthDateInput
-            type="text"
-            placeholder="생년월일"
-            value={birthDate}
-            onChange={handleBirthDateChange}
-          />
+          <BirthDateInput type="text" placeholder="생년월일" value={birthDate} onChange={handleBirthDateChange} />
           <Hyphen>-</Hyphen>
-          <GenderInput
-            type="text"
-            value={genderDigit}
-            onChange={handleGenderDigitChange}
-            maxLength="1"
-          />
+          <GenderInput type="text" value={genderDigit} onChange={handleGenderDigitChange} maxLength="1" />
           <MaskedText>●●●●●●</MaskedText>
         </InputWrapper>
 
@@ -178,17 +202,44 @@ const SignupPage = () => {
           <Label htmlFor="agreePrivacy">개인(신용)정보 수집이용 동의</Label>
         </CheckboxWrapper>
 
-        <SignupButton disabled={!formComplete} onClick={() => alert("인증번호가 발송되었습니다.")}>
+        <SignupButton disabled={!formComplete} onClick={handleRequestVerification}>
           인증번호 받기
         </SignupButton>
 
         <OtherLogin onClick={() => navigate("/login")}>토스 앱으로 로그인</OtherLogin>
       </SignupBox>
-
       <SignUp>
         아직 토스증권 회원이 아니신가요?{" "}
         <Underline onClick={() => navigate("/signup")}>가입하기</Underline>
       </SignUp>
+        {/* 인증번호 입력 모달 */}
+        {isModalOpen && (
+      <ModalBackground>
+        <ModalContent>
+          <h3>인증번호 입력</h3>
+          <VerificationWrapper>
+          <VerificationInput
+            type="text"
+            placeholder="인증번호 입력"
+            value={verificationCode}
+            onChange={(e) => setVerificationCode(e.target.value)}
+          />
+          <ModalButton onClick={handleSignup}>확인</ModalButton>
+          </VerificationWrapper>
+        </ModalContent>
+      </ModalBackground>
+    )}
+
+    {/* 회원가입 완료 모달 */}
+    {isSuccessModalOpen && (
+      <ModalBackground>
+        <ModalContent>
+          <h3>회원가입 완료</h3>
+          <p>회원가입이 성공적으로 완료되었습니다.</p>
+          <ModalButton onClick={() => navigate("/login")}>확인</ModalButton>
+        </ModalContent>
+      </ModalBackground>
+    )}
     </SignupContainer>
   );
 };
@@ -418,4 +469,58 @@ const Underline = styled.span`
   text-decoration: underline;
   cursor: pointer;
   color: #1a73e8;
+`;
+
+const ModalBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+`;
+
+const VerificationWrapper = styled.div`
+  display: flex;  
+  align-items: stretch;
+  width: 100%;
+`;
+
+const ModalButton = styled.button`
+  //margin-top: 10px;
+  width: 90px; /* 버튼 크기 고정 */
+  height: 40px;
+  background: #1a73e8;
+  color: white;
+  border: none;
+  //border-radius: 0 10px 10px 0;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+
+  &:hover {
+    background: #005ecb;
+  }
+
+`;
+
+const VerificationInput = styled.input`
+  padding: 12px;
+  flex: 1;
+  //margin-top: 10px;
+  border: 1px solid #ddd;
+  &:focus {
+    outline: none;
+    border-color: #1a73e8;
+  }
 `;
