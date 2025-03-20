@@ -70,7 +70,7 @@ const TabButton = styled.button`
   all: unset;
   cursor: pointer;
   padding: 8px 0;
-  border-bottom: ${(props) => (props.$isActive ? '1px solid white' : 'none')};
+  border-bottom: ${(props) => (props.$isActive ? '1.2px solid' : 'none')};
 `;
 
 const Checkbox = styled.button`
