@@ -28,6 +28,24 @@ const Header = ({ isWishlistOpen }) => {
     };
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+  
+      const result = await response.text();
+      alert(result);
+  
+      logout();
+      navigate("/");
+    } catch (error) {
+      console.error("🚨 로그아웃 오류:", error);
+      alert("로그아웃 실패! 다시 시도해주세요.");
+    }
+  };
+
   return (
     <HeaderContainer $isDarkMode={isDarkMode}>
       <Logo onClick={() => navigate('/')}>
@@ -57,17 +75,10 @@ const Header = ({ isWishlistOpen }) => {
       {user ? (
         <UserContainer>
           <UserName>{user.name}님</UserName>
-          <LogoutButton
-            onClick={() => {
-              logout();
-              console.clear();
-              alert("로그아웃 되었습니다!");
-
-              setTimeout(() => navigate("/"), 100);
-            }}
-          >
+          <LogoutButton onClick={handleLogout}>
             로그아웃
           </LogoutButton>
+
         </UserContainer>
       ) : (
         <LoginButton $isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
