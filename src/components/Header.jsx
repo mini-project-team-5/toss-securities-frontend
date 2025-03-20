@@ -70,7 +70,7 @@ const Header = ({ isWishlistOpen }) => {
           </LogoutButton>
         </UserContainer>
       ) : (
-        <LoginButton isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
+        <LoginButton $isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
           로그인
         </LoginButton>
       )}

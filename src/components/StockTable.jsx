@@ -1,42 +1,55 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import CartButton from './CartButton';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const StockTable = ({ datas }) => {
+  const navigate = useNavigate();
   const [addedItems, setAddedItems] = useState([]);
 
-  // 로그인 여부 확인
-  const checkLogin = () => {
-    return true; // 임시로 true 설정
-  };
+  const checkLogin = useCallback(
+    () => !!sessionStorage.getItem('accessToken'),
+    [],
+  );
 
-  // 장바구니 상태 불러오기
-  useEffect(() => {
-    const savedItems = JSON.parse(localStorage.getItem('addedItems')) || []; // 임시로 로컬스토리지, 실제는 api 통신
-    setAddedItems(savedItems);
+  const getWishList = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/wishlist');
+      setAddedItems(response.data.map((item) => item.stockCode));
+    } catch (error) {
+      console.error('위시리스트 가져오기 실패:', error);
+    }
   }, []);
 
-  const handleAddtoCart = (stock) => {
+  useEffect(() => {
+    getWishList();
+  }, [getWishList]);
+
+  const handleClickWish = async (stockCode, e) => {
+    e.stopPropagation();
+
+    if (!checkLogin()) {
+      alert('로그인이 필요합니다!');
+      window.location.href = '/login';
+      return;
+    }
+
     try {
-      if (!checkLogin()) {
-        alert('로그인이 필요합니다!');
-        window.location.href = '/login';
-        return;
+      if (addedItems.includes(stockCode)) {
+        await axios.delete(`/api/wishlist/${stockCode}`);
+        setAddedItems((prev) => prev.filter((code) => code !== stockCode));
+      } else {
+        await axios.post('/api/wishlist', { stockCode });
+        setAddedItems((prev) => [...prev, stockCode]);
       }
-
-      // 장바구니 추가 api 호출 로직 추가
-      // ...
-
-      const newAddedItems = [...addedItems, stock.rank];
-      setAddedItems(newAddedItems);
-      alert('장바구니 추가 완료');
     } catch (error) {
-      console.log('장바구니 추가 실패: ', error);
+      console.error('위시리스트 업데이트 실패:', error);
     }
   };
 
-  const isItemAdded = (stockRank) => {
-    return addedItems.includes(stockRank);
+  const isItemAdded = (stockCode) => {
+    return addedItems.includes(stockCode);
   };
 
   return (
@@ -63,11 +76,14 @@ const StockTable = ({ datas }) => {
                   ? `+${stock.rate}%`
                   : `${stock.rate}%`;
             return (
-              <TableRow key={stock.rank}>
+              <TableRow
+                key={stock.code}
+                onClick={() => navigate(`/stock/${stock.code}`)}
+              >
                 <CartCell>
                   <CartButton
-                    onClick={() => handleAddtoCart(stock)}
-                    isAdded={isItemAdded(stock.rank)}
+                    onClick={(e) => handleClickWish(stock.code, e)}
+                    isAdded={isItemAdded(stock.code)}
                   />
                 </CartCell>
                 <TableCell>{stock.rank}</TableCell>
@@ -95,9 +111,15 @@ const Table = styled.table`
 
   tbody tr {
     cursor: pointer;
+    &:hover {
+      background-color: rgba(116, 116, 116, 0.2);
+    }
   }
   tbody tr:nth-child(odd) {
     background-color: rgba(245, 245, 245, 0.03);
+    &:hover {
+      background-color: rgba(116, 116, 116, 0.2);
+    }
   }
 `;
 

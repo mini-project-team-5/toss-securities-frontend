@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Tab from '../components/Tab';
 import { useTab } from '../hooks/useTab';
@@ -6,6 +6,7 @@ import StockTable from '../components/StockTable';
 import TimeTab from '../components/TimeTab';
 
 import { Pagination, Stack } from '@mui/material';
+import axios from 'axios';
 
 const tabList = [
   { label: '토스증권 거래대금', value: 'toss-price' },
@@ -17,30 +18,11 @@ const tabList = [
   { label: '인기', value: 'popular' },
 ];
 
-const stockList = [
-  {
-    rank: 1,
-    name: 'KODEX 200선물인버스 2X',
-    price: 2090,
-    rate: -2.5,
-    volume: 8621997,
-  },
-  { rank: 2, name: '삼성전자', price: 58600, rate: 1.7, volume: 3463615 },
-  { rank: 3, name: '한화시스템', price: 41350, rate: 6.4, volume: 2114167 },
-  { rank: 4, name: '삼성전자', price: 58600, rate: 0.0, volume: 3463615 },
-  { rank: 5, name: '한화시스템', price: 41350, rate: 6.4, volume: 2114167 },
-  { rank: 6, name: '삼성전자', price: 58600, rate: 1.7, volume: 3463615 },
-  { rank: 7, name: '한화시스템', price: 41350, rate: 6.4, volume: 2114167 },
-  { rank: 8, name: '삼성전자', price: 58600, rate: 1.7, volume: 3463615 },
-  { rank: 9, name: '한화시스템', price: 41350, rate: 6.4, volume: 2114167 },
-  { rank: 10, name: '삼성전자', price: 58600, rate: 1.7, volume: 3463615 },
-  { rank: 11, name: '삼성전자', price: 58600, rate: 1.7, volume: 3463615 },
-];
-
 const ITEMS_PER_PAGE = 10;
 
 const HomePage = () => {
   const { currentTab, setTab } = useTab('volume');
+  const [stockList, setStockList] = useState([]);
   const handleTabClick = (tab) => {
     setTab(tab);
   };
@@ -48,6 +30,19 @@ const HomePage = () => {
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   const currentTime = `${hours}:${minutes}`;
+
+  const getStockList = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/volume-rank`);
+      setStockList(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getStockList();
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   //   const totalPages = Math.ceil(stockList.length / ITEMS_PER_PAGE);
