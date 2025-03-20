@@ -127,6 +127,7 @@ const SignupPage = () => {
       console.log("🔹 서버 응답 데이터:", data);
 
       if (status === 200 && data) {
+        alert("회원가입 완료 !");
         navigate("/login");
       } else if (status === 400) {
         alert(data?.message || "회원가입 실패! 입력 값을 확인해주세요.");
