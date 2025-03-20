@@ -111,9 +111,15 @@ const Table = styled.table`
 
   tbody tr {
     cursor: pointer;
+    &:hover {
+      background-color: rgba(116, 116, 116, 0.2);
+    }
   }
   tbody tr:nth-child(odd) {
     background-color: rgba(245, 245, 245, 0.03);
+    &:hover {
+      background-color: rgba(116, 116, 116, 0.2);
+    }
   }
 `;
 
