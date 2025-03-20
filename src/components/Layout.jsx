@@ -2,9 +2,11 @@ import { Outlet } from 'react-router-dom';
 import SideBar from './SideBar';
 import Header from './Header';
 import { useState } from 'react';
+import useAuth from "../hooks/useAuth";
 
 const Layout = () => {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <div style={{ display: 'flex' }}>
@@ -19,7 +21,7 @@ const Layout = () => {
           transition: 'margin-right 0.3s ease-in-out',
         }}
       >
-        <Header isWishlistOpen={isWishlistOpen} />
+        <Header user={user} logout={logout} />
         <Outlet />
       </div>
     </div>
