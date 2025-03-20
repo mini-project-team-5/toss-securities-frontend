@@ -1,14 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import UserIcon from '../assets/im-icon.png';
 import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 
 const DetailPage = () => {
   const { code } = useParams();
   const [stock, setStock] = useState(null);
   const [value, setValue] = useState('');
+  const [comments, setComments] = useState([]);
   const textareaRef = useRef(null);
+
+  const checkLogin = useCallback(
+    () => !!sessionStorage.getItem('authToken'),
+    [],
+  );
 
   const handleInput = () => {
     if (textareaRef.current) {
@@ -28,9 +35,51 @@ const DetailPage = () => {
     }
   };
 
+  const getComments = async (stockCode) => {
+    try {
+      const response = await axiosInstance.get(`/api/comments/${stockCode}`);
+      console.log(response);
+      setComments(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     if (code) {
       getStockQuote(code);
+    }
+  }, [code]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!checkLogin()) {
+      alert('로그인이 필요합니다!');
+      window.location.href = '/login';
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post('/api/comments', {
+        stockCode: code,
+        content: value,
+      });
+
+      if (response.status === 201) {
+        setValue('');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    getComments(code);
+  };
+
+  useEffect(() => {
+    if (code) {
+      Promise.all([getStockQuote(code), getComments(code)]).catch((error) => {
+        console.error(error);
+      });
     }
   }, [code]);
 
@@ -85,7 +134,7 @@ const DetailPage = () => {
             <UserImageWrapper>
               <img src={UserIcon} alt="user" />
             </UserImageWrapper>
-            <Posting>
+            <Posting onSubmit={handleSubmit}>
               <textarea
                 placeholder="의견을 남겨보세요"
                 ref={textareaRef}
@@ -93,21 +142,25 @@ const DetailPage = () => {
                 onInput={handleInput}
                 onChange={(e) => setValue(e.target.value)}
               />
-              <button>등록</button>
+              <button type="submit">등록</button>
             </Posting>
           </PostingWrapper>
         </StockCommunity>
         <Line></Line>
-        <StockCommentWrapper>
-          <CommentImageWrapper>
-            <img src={UserIcon} alt="user" />
-            <div>주주</div>
-          </CommentImageWrapper>
-          <CommentUserWrapper>
-            <Nickname>노웅박스</Nickname>
-            <div>흔들림 없는 편안함 ~</div>
-          </CommentUserWrapper>
-        </StockCommentWrapper>
+        <StockCommentContainer>
+          {comments.map((comment) => (
+            <StockCommentWrapper key={comment.commentId}>
+              <CommentImageWrapper>
+                <img src={UserIcon} alt="user" />
+                <div>주주</div>
+              </CommentImageWrapper>
+              <CommentUserWrapper>
+                <Nickname>{comment.userName}</Nickname>
+                <div>{comment.content}</div>
+              </CommentUserWrapper>
+            </StockCommentWrapper>
+          ))}
+        </StockCommentContainer>
       </StockCommunityWrapper>
     </DetailContainer>
   );
@@ -250,6 +303,8 @@ const Posting = styled.form`
     border: none;
     resize: none;
     box-sizing: border-box;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 
     @media (prefers-color-scheme: dark) {
       color: white;
@@ -267,7 +322,11 @@ const Posting = styled.form`
     cursor: pointer;
   }
 `;
-
+const StockCommentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
 const StockCommentWrapper = styled.div`
   display: flex;
   gap: 20px;
@@ -278,11 +337,10 @@ const CommentImageWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  width: 33px;
 
   img {
-    width: 100%;
-    height: 100%;
+    width: 33px;
+    height: 33px;
     border-radius: 50%;
   }
 
@@ -297,6 +355,11 @@ const CommentUserWrapper = styled.div`
   flex-direction: column;
   gap: 10px;
   font-size: 15px;
+  div {
+    white-space: pre-line;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 `;
 const Nickname = styled.div`
   font-weight: bold;
