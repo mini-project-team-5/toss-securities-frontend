@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import axiosInstance from "../utils/axiosInstance";
 
 const isTokenValid = (token) => {
-  if (!token) return false; // 토큰이 없으면 유효하지 않음
-
+  if (!token) return false;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1])); // JWT Payload 디코딩
-    const exp = payload.exp * 1000; // 만료 시간 (초 단위 → 밀리초 변환)
-    return exp > Date.now(); // 현재 시간보다 크면 유효한 토큰
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.exp * 1000 > Date.now();
   } catch (error) {
     console.error("토큰 검증 실패:", error);
     return false;
@@ -15,6 +14,18 @@ const isTokenValid = (token) => {
 
 const useAuth = () => {
   const [user, setUser] = useState(null);
+  const [addedItems, setAddedItems] = useState([]);
+
+  // 위시리스트 가져오기 함수
+  const fetchWishlist = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await axiosInstance.get("/api/wishlist");
+      setAddedItems(response.data.map((item) => item.stock.code));
+    } catch (error) {
+      console.error("위시리스트 가져오기 실패:", error);
+    }
+  }, [user]);
 
   useEffect(() => {
     const token = sessionStorage.getItem("authToken");
@@ -30,6 +41,42 @@ const useAuth = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    }
+  }, [user, fetchWishlist]);
+
+  const addToWishlist = async (stock) => {
+    if (!user) {
+      alert("로그인이 필요합니다!");
+      window.location.href = "/login";
+      return;
+    }
+    try {
+      await axiosInstance.post("/api/wishlist", { stock });
+      setAddedItems((prev) => [...prev, stock.code]);
+      await fetchWishlist(); // 위시리스트 최신화
+    } catch (error) {
+      console.error("위시리스트 추가 실패:", error);
+    }
+  };
+
+  const removeFromWishlist = async (stock) => {
+    if (!user) {
+      alert("로그인이 필요합니다!");
+      window.location.href = "/login";
+      return;
+    }
+    try {
+      await axiosInstance.delete(`/api/wishlist/${stock.code}`);
+      setAddedItems((prev) => prev.filter((code) => code !== stock.code));
+      await fetchWishlist(); // 위시리스트 최신화
+    } catch (error) {
+      console.error("위시리스트 삭제 실패:", error);
+    }
+  };
+
   const login = (name, token) => {
     if (!isTokenValid(token)) {
       console.error("유효하지 않은 토큰. 로그인 실패");
@@ -39,6 +86,8 @@ const useAuth = () => {
     sessionStorage.setItem("authToken", token);
     sessionStorage.setItem("userName", name);
     setUser({ name, token });
+
+    fetchWishlist();
   };
 
   const logout = () => {
@@ -46,10 +95,11 @@ const useAuth = () => {
     sessionStorage.removeItem("authToken");
     sessionStorage.removeItem("userName");
     setUser(null);
+    setAddedItems([]);
     window.location.href = "/login";
   };
 
-  return { user, login, logout };
+  return { user, addedItems, addToWishlist, removeFromWishlist, login, logout };
 };
 
 export default useAuth;

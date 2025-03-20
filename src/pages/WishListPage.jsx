@@ -1,42 +1,48 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import like1 from '../assets/like1.png';
-import like2 from '../assets/like2.png';
-
-const mockData = [
-  {
-    id: 1,
-    name: '셀렉티스(ADR)',
-    price: '2,700원',
-    change: '+827원 (44.1%)',
-    liked: true,
-  },
-  {
-    id: 2,
-    name: '디지털 앨라이',
-    price: '140원',
-    change: '+25원 (22.1%)',
-    liked: false,
-  },
-  {
-    id: 3,
-    name: '메디룸 헬스케어',
-    price: '1,323원',
-    change: '+423원 (47.0%)',
-    liked: true,
-  },
-];
+import { useCallback, useEffect, useState } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
+import like2 from "../assets/like2.png";
+import axiosInstance from "../utils/axiosInstance";
 
 const WishListPage = ({ isOpen }) => {
-  const [stocks, setStocks] = useState(mockData);
+  const navigate = useNavigate();
+  const { user, addedItems, removeFromWishlist } = useAuth();
+  const [wishlistData, setWishlistData] = useState([]);
 
-  const toggleLike = (id) => {
-    setStocks((prevStocks) =>
-      prevStocks.map((stock) =>
-        stock.id === id ? { ...stock, liked: !stock.liked } : stock,
-      ),
-    );
+  useEffect(() => {
+    const fetchWishlistData = async () => {
+      try {
+        const response = await axiosInstance.get("/api/wishlist");
+        setWishlistData(response.data);
+      } catch (error) {
+        console.error("위시리스트 가져오기 실패:", error);
+      }
+    };
+
+    if (user) {
+      fetchWishlistData();
+    }
+  }, [user, addedItems]); // addedItems 변경될 때 UI 업데이트
+
+  const checkLogin = useCallback(() => !!user, [user]);
+
+  const handleClickWish = async (stock, e) => {
+    e.stopPropagation();
+    if (!checkLogin()) {
+      alert("로그인이 필요합니다!");
+      window.location.href = "/login";
+      return;
+    }
+    removeFromWishlist(stock);
   };
+
+  const handleNavigate = useCallback(
+    (code) => {
+      navigate(`/stock/${code}`);
+    },
+    [navigate]
+  );
 
   return (
     <WishListPageContainer $isOpen={isOpen}>
@@ -45,20 +51,23 @@ const WishListPage = ({ isOpen }) => {
       <MenuItem>관심 주식 TOP 10</MenuItem>
       <StyledH4>관심 그룹에 담아보세요</StyledH4>
       <StockList>
-        {stocks.map((stock) => (
-          <StockItem key={stock.id}>
-            <StockInfo>
-              <StockName>{stock.name}</StockName>
-            </StockInfo>
-            <StockPriceChange>
-              <StockPrice>{stock.price}</StockPrice>
-              <StockChange $change={stock.change}>{stock.change}</StockChange>
-            </StockPriceChange>
-            <HeartIcon onClick={() => toggleLike(stock.id)}>
-              <img src={stock.liked ? like2 : like1} alt="heart" />
-            </HeartIcon>
-          </StockItem>
-        ))}
+        {wishlistData.length === 0 ? (
+          <EmptyMessage>관심 그룹이 없습니다.</EmptyMessage>
+        ) : (
+          wishlistData.map((stock) => {
+            return (
+              <StockItem key={stock.stock.code} onClick={() => handleNavigate(stock.stock.code)}>
+                <StockInfo>
+                  <StockName>{stock.stock.name}</StockName>
+                </StockInfo>
+                <StockPrice>{(stock.stock.price ?? 0).toLocaleString()}원</StockPrice>
+                <HeartIcon onClick={(e) => handleClickWish(stock.stock, e)}>
+                  <img src={like2} alt="heart" />
+                </HeartIcon>
+              </StockItem>
+            );
+          })
+        )}
       </StockList>
     </WishListPageContainer>
   );
@@ -167,9 +176,9 @@ const StockPrice = styled.span`
   color: #3e3e41;
 `;
 
-const StockChange = styled.span`
-  font-size: 14px;
-  color: ${(props) => (props.$change.includes('+') ? 'red' : 'blue')};
+const StockChange = styled.div`
+  color: ${(props) =>
+    props.$positive ? '#f04251' : props.$negative ? '#3485fa' : '#9e9ea4'};
 `;
 
 const HeartIcon = styled.div`
@@ -189,4 +198,11 @@ const HeartIcon = styled.div`
   &:hover img {
     transform: scale(1.1);
   }
+`;
+
+const EmptyMessage = styled.p`
+  text-align: center;
+  font-size: 14px;
+  color: #888;
+  margin-top: 20px;
 `;

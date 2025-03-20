@@ -1,30 +1,34 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import styled from 'styled-components';
 import CartButton from './CartButton';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../utils/axiosInstance';
+//import axiosInstance from '../utils/axiosInstance';
+import useAuth from '../hooks/useAuth';
 
 const StockTable = ({ datas }) => {
   const navigate = useNavigate();
-  const [addedItems, setAddedItems] = useState([]);
+  const { user, addedItems, addToWishlist, removeFromWishlist } = useAuth();
+  //const [addedItems, setAddedItems] = useState([]);
 
-  const checkLogin = useCallback(
-    () => !!sessionStorage.getItem('authToken'),
-    [],
-  );
+  // const checkLogin = useCallback(
+  //   () => !!sessionStorage.getItem('authToken'),
+  //   [],
+  // );
 
-  const getWishList = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get('/api/wishlist');
-      setAddedItems(response.data.map((item) => item.stock.code));
-    } catch (error) {
-      console.error('위시리스트 가져오기 실패:', error);
-    }
-  }, []);
+  const checkLogin = useCallback(() => !!user, [user]);
 
-  useEffect(() => {
-    getWishList();
-  }, [getWishList]);
+  // const getWishList = useCallback(async () => {
+  //   try {
+  //     const response = await axiosInstance.get('/api/wishlist');
+  //     setAddedItems(response.data.map((item) => item.stock.code));
+  //   } catch (error) {
+  //     console.error('위시리스트 가져오기 실패:', error);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   getWishList();
+  // }, [getWishList]);
 
   const handleClickWish = async (stock, e) => {
     e.stopPropagation();
@@ -35,16 +39,23 @@ const StockTable = ({ datas }) => {
       return;
     }
 
-    try {
-      if (addedItems.includes(stock.code)) {
-        await axiosInstance.delete(`/api/wishlist/${stock.code}`);
-        setAddedItems((prev) => prev.filter((code) => code !== stock.code));
-      } else {
-        await axiosInstance.post('/api/wishlist', { stock });
-        setAddedItems((prev) => [...prev, stock.code]);
-      }
-    } catch (error) {
-      console.error('위시리스트 업데이트 실패:', error);
+  //   try {
+  //     if (addedItems.includes(stock.code)) {
+  //       await axiosInstance.delete(`/api/wishlist/${stock.code}`);
+  //       setAddedItems((prev) => prev.filter((code) => code !== stock.code));
+  //     } else {
+  //       await axiosInstance.post('/api/wishlist', { stock });
+  //       setAddedItems((prev) => [...prev, stock.code]);
+  //     }
+  //   } catch (error) {
+  //     console.error('위시리스트 업데이트 실패:', error);
+  //   }
+  // };
+
+    if (addedItems.includes(stock.code)) {
+      removeFromWishlist(stock);
+    } else {
+      addToWishlist(stock);
     }
   };
 
