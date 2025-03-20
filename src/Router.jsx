@@ -6,9 +6,12 @@ import SignupPage from './pages/SignupPage';
 import SideBar from './components/SideBar';
 import WishListPage from './pages/WishListPage';
 import Header from './components/Header';
+import useAuth from "./hooks/useAuth";
 
 const Router = () => {
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const { user, logout } = useAuth();
+
   return (
     <BrowserRouter>
       <Routes>
@@ -27,7 +30,7 @@ const Router = () => {
                   transition: 'margin-right 0.3s ease-in-out',
                 }}
               >
-                <Header />
+                <Header user={user} logout={logout} />
                 <HomePage />
               </div>
             </div>
@@ -35,7 +38,6 @@ const Router = () => {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/" element={<HomePage />} />
       </Routes>
     </BrowserRouter>
   );
