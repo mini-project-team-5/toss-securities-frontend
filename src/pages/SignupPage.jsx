@@ -4,6 +4,7 @@ import styled from "styled-components";
 import CloseIcon from "../assets/close.png";
 import LogoImage from "../assets/logo.png";
 
+
 const SignupPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -12,6 +13,7 @@ const SignupPage = () => {
   const [carrier, setCarrier] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
+
   const [isChecked, setIsChecked] = useState({
     all: false,
     service: false,
@@ -21,7 +23,6 @@ const SignupPage = () => {
 
   const [formComplete, setFormComplete] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   useEffect(() => {
     const isFormFilled = 
@@ -80,17 +81,16 @@ const SignupPage = () => {
     });
   };
 
-  // ✅ 인증번호 요청 (모달 열기)
   const handleRequestVerification = () => {
     fetch("http://localhost:8080/auth/send-verification", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ phone_number: phoneNumber.replace(/\s/g, "") }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone_number: phoneNumber.replace(/\s/g, "") }),
     })
       .then((response) => response.text())
       .then((message) => {
-        alert(message); // 성공 메시지 확인
-        setIsModalOpen(true); // 인증번호 입력 모달 열기
+        alert(message);
+        setIsModalOpen(true);
       })
       .catch((error) => console.error("인증번호 요청 오류:", error));
   };
@@ -105,22 +105,41 @@ const SignupPage = () => {
       verification_code: verificationCode,
     };
 
+    console.log("📢 회원가입 요청 데이터:", requestData);
+
     fetch("http://localhost:8080/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestData),
     })
-      .then((response) => response.text())
-      .then((message) => {
-        if (message.includes("회원가입 성공")) {
-          setIsModalOpen(false);
-          setIsSuccessModalOpen(true); 
-        } else {
-          alert(message);
-        }
-      })
-      .catch((error) => console.error("회원가입 오류:", error));
-  };
+    .then(async (response) => {
+      const text = await response.text();
+
+      try {
+        const jsonData = JSON.parse(text); 
+        return { status: response.status, data: jsonData };
+      } catch {
+        return { status: response.status, data: text };
+      }
+    })
+    .then(({ status, data }) => {
+      console.log("🔹 서버 응답 상태 코드:", status);
+      console.log("🔹 서버 응답 데이터:", data);
+
+      if (status === 200 && data) {
+        navigate("/login");
+      } else if (status === 400) {
+        alert(data?.message || "회원가입 실패! 입력 값을 확인해주세요.");
+      } else {
+        alert("회원가입에 실패했습니다. 나중에 다시 시도해주세요.");
+      }
+    })
+    .catch((error) => {
+      console.error("🚨 서버 오류:", error);
+      alert("서버 오류 발생! 다시 시도해주세요.");
+    });
+};
+
 
   return (
     <SignupContainer>
@@ -226,17 +245,6 @@ const SignupPage = () => {
           />
           <ModalButton onClick={handleSignup}>확인</ModalButton>
           </VerificationWrapper>
-        </ModalContent>
-      </ModalBackground>
-    )}
-
-    {/* 회원가입 완료 모달 */}
-    {isSuccessModalOpen && (
-      <ModalBackground>
-        <ModalContent>
-          <h3>회원가입 완료</h3>
-          <p>회원가입이 성공적으로 완료되었습니다.</p>
-          <ModalButton onClick={() => navigate("/login")}>확인</ModalButton>
         </ModalContent>
       </ModalBackground>
     )}

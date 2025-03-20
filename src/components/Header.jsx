@@ -4,10 +4,12 @@ import styled from 'styled-components';
 import SearchIcon from '../assets/search.png';
 import LightModeLogo from '../assets/light-mode-logo.png';
 import DarkModeLogo from '../assets/dark-mode-logo.png';
+import useAuth from "../hooks/useAuth";
 
 const Header = ({ isWishlistOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
 
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -52,12 +54,26 @@ const Header = ({ isWishlistOpen }) => {
         </SearchBar>
       </NavMenu>
 
-      <LoginButton
-        $isWishlistOpen={isWishlistOpen}
-        onClick={() => navigate('/login')}
-      >
-        로그인
-      </LoginButton>
+      {user ? (
+        <UserContainer>
+          <UserName>{user.name}님</UserName>
+          <LogoutButton
+            onClick={() => {
+              logout();
+              console.clear();
+              alert("로그아웃 되었습니다!");
+
+              setTimeout(() => navigate("/"), 100);
+            }}
+          >
+            로그아웃
+          </LogoutButton>
+        </UserContainer>
+      ) : (
+        <LoginButton $isWishlistOpen={isWishlistOpen} onClick={() => navigate("/login")}>
+          로그인
+        </LoginButton>
+      )}
     </HeaderContainer>
   );
 };
@@ -159,6 +175,37 @@ const LoginButton = styled.button`
 
   &:hover {
     background: #005ecb;
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const UserContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const UserName = styled.span`
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+const LogoutButton = styled.button`
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+
+  &:hover {
+    background: darkred;
   }
 
   &:focus {
