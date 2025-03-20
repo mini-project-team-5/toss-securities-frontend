@@ -6,7 +6,7 @@ import StockTable from '../components/StockTable';
 import TimeTab from '../components/TimeTab';
 
 import { Pagination, Stack } from '@mui/material';
-import axios from 'axios';
+import axiosInstance from '../utils/axiosInstance';
 
 const tabList = [
   { label: '토스증권 거래대금', value: 'toss-price' },
@@ -33,7 +33,7 @@ const HomePage = () => {
 
   const getStockList = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/volume-rank`);
+      const response = await axiosInstance.get(`/api/volume-rank`);
       setStockList(response.data);
     } catch (error) {
       console.error(error);
